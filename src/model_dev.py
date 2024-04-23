@@ -1,6 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from sklearn.linear_model import LinearRegression
+from .utils import store_model
 
 class Model(ABC):
     '''
@@ -37,6 +38,7 @@ class LinearRegressionModel(Model):
             model = LinearRegression(**kwargs)
             model.fit(X_train, y_train)
             logging.info("Model training complete.")
+            store_model(model)
             return model
         except Exception as e:
             logging.error(f"Error while training model: {e}")

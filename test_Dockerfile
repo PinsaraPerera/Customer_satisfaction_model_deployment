@@ -1,0 +1,31 @@
+# Use an official Python runtime as a base image
+FROM python:3.8-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the local directory contents to the container
+COPY . /app
+
+# Install Python dependencies
+# Note: Ensure that requirements.txt includes all necessary libraries
+RUN pip install -r requirements.txt
+
+# Install ZenML with server capabilities
+# RUN pip install zenml["server"]
+
+# Run ZenML setup commands
+RUN zenml init && \
+    zenml integration install mlflow -y && \
+    zenml experiment-tracker register mlflow_tracker --flavor=mlflow && \
+    zenml model-deployer register mlflow --flavor=mlflow && \
+    zenml stack register mlflow_stack -a default -o default -d mlflow -e mlflow_tracker --set
+
+# Expose the port the app runs on
+EXPOSE 8080
+
+# Make the startup script executable
+RUN python run_pipeline.py
+
+# Command to execute the startup script
+CMD ["zenml", "up", "--ip-address=0.0.0.0", "--port=8080"]
